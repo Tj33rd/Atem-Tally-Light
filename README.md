@@ -24,4 +24,4 @@ To check whether or not the application is running, go to `[LocalIP]:[PORT]`
 |AtemIp          |The IP-address of the ATEM you want to connect to. Use a tool such as [IP-scanner](https://www.advanced-ip-scanner.com/) to find the ATEM's IP| N/A|
 
 # Questions
-If you are struggling to get it up and running or you have other questions regarding this system, please create an issue or send me a message.
+If you are struggling to get it up and running or have other questions regarding this system, please create an issue or send me a message.
