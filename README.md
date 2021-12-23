@@ -1,6 +1,6 @@
 # Atem-Tally-Light
 
-This tally light system is specifically designed for Koningskerk Zwolle-zuid. It may or may not work propperly or suit your needs.
+This tally light system is specifically designed for Koningskerk Zwolle-zuid. It may or may not work properly or suit your needs.
 
 # Setup
 
