@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tally Test</title>
+</head>
+<body>
+    <input id="myCam" placeholder="Camera Input"/>
+    <button onclick="setMyCam()">Apply</button>
+
+    <p id="tally">Please select a (valid) camera</p>
+    <a href="config.html">TO EDIT</a>
+</body>
+
+<style>
+    *{
+        align-items: center;
+        text-align: center;
+        padding: 5px;
+        border-radius: 5px;
+        border-style: hidden;
+    }
+
+    body {
+        background-color: BLACK;
+        color:WHITE;
+    }
+    #tally {
+        font-size: 100px;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: bolder;
+        text-align: center;
+    }
+</style>
+
+
+<script>
+    const socket = new WebSocket(`ws://${location.host}`);
+
+    let myCam = 0;
+    
+
+    let currentProgram = 0;
+    let currentPreview = 0;
+    let trans = false;
+
+    socket.addEventListener('message', (event)=>{
+        if(JSON.parse(event.data).pgm != null){
+            currentProgram = JSON.parse(event.data).pgm;
+            currentPreview = JSON.parse(event.data).pvw;
+            inTrans = JSON.parse(event.data).trans;
+            setTally();
+        }else if(JSON.parse(event.data).newSelectedCamera != null){
+            myCam = JSON.parse(event.data).newSelectedCamera;
+            setTally();
+        }else{
+            console.log(event);
+        }
+    });
+
+    function setMyCam(){
+        myCam = parseInt(document.getElementById("myCam").value);
+        setTally();
+    }
+
+    function setTally() {
+        if(myCam == currentProgram){
+            document.body.style.backgroundColor = "red";
+            document.body.style.color = "black"
+        }else if(myCam == currentPreview){
+            document.body.style.backgroundColor = inTrans ? "red" : "green";
+            document.body.style.color = "black"
+        }else{
+            document.body.style.backgroundColor = "black";    
+            document.body.style.color = "white"
+        }
+        if(myCam <= 0 || myCam == null || isNaN(myCam)){
+            document.getElementById("tally").innerHTML = "Please select a (valid) camera";
+        } else {
+            document.getElementById("tally").innerHTML = myCam;
+        }
+    }
+</script>
+
+</html>
+

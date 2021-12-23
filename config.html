@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tally Test</title>
+</head>
+<body>
+    <p id="tally">Edit page</p>
+    <a href="tally.html">BACK</a>
+    <div id="clients" class="container" style="max-width: 300px; margin: auto;">
+        
+    </div>
+</body>
+
+<style>
+    *{
+        align-items: center;
+        text-align: center;
+        padding: 5px;
+        border-radius: 5px;
+        border-style: hidden;
+    }
+
+    body {
+        background-color: BLACK;
+        color:WHITE;
+    }
+    #tally {
+        font-size: 100px;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: bolder;
+        text-align: center;
+    }
+</style>
+
+
+<script>
+    const socket = new WebSocket(`ws://${location.host}`);
+
+    let previousConnections = [];
+    let connections = [];
+
+    
+
+    function showConnections(){
+        let removeDiff = previousConnections.filter(x => !connections.includes(x));
+        let newDiff = connections.filter(x => !previousConnections.includes(x));
+
+        removeDiff.forEach(client => {
+            document.getElementById(client).remove();
+        });
+
+        newDiff.forEach(client => {
+
+            if(document.getElementById(client) == null){
+                document.getElementById('clients').innerHTML += `
+                <div class="client" id="${client}" style="align-items: center; display: flex; text-align: center;">
+                    <p>${client}</p>
+                    <select name="cameras" id="cameras" onchange="selectCamera(this);">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>`;
+            }
+        });
+
+        previousConnections = connections;
+    }
+
+    function setNewConnections(fetchedConnections){
+        connections = fetchedConnections;
+        showConnections();
+    }
+
+    function fetch_status(response, format) {
+		
+		return new Promise((resolve, reject) => {
+			
+			if( response.status >= 200 && response.status < 300 ) {
+				if( format == 'json' ) {
+					resolve(response.json());
+				} else {
+					resolve(response.text());
+				}
+			} else {
+				reject(response);
+			}
+			
+		});
+	}
+
+    function fetchClients() {
+		fetch(`/api/clients`, {
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+			},
+			credentials: 'same-origin',
+			mode: 'cors',
+			
+		}).then(response => {
+			return fetch_status(response, 'json');
+			
+		}).then(data => {
+			setNewConnections( data.connections )
+			
+		}).catch(err => {
+			console.log(err.status);
+		});
+	}
+
+    function newClientCameraSelection(cameraID, clientID) {
+        const data = {cameraID, clientID};
+        const options = {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+        console.log("fetching");
+		fetch(`/api/newClientCameraSelection`, options);
+	}
+
+    socket.addEventListener('open', (event)=>{
+        fetchClients();
+    });
+
+
+    function selectCamera(value){
+        newClientCameraSelection(value.value,value.parentElement.id)
+    }
+
+    setInterval(() => {
+        fetchClients();
+    }, 1000);
+
+</script>
+
+</html>
+
