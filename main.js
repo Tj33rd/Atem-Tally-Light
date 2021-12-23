@@ -24,15 +24,14 @@ const HTTP_PORT = argv.port ? argv.port : 8080;
 
 app.use( express.json() );
 
-// myAtem.on('info', console.log);
-// myAtem.on('error', console.error);
-// myAtem.connect('192.168.20.112');
-// myAtem.on('connected', () => {
-// 	// console.log(myAtem.state);
-// const inputs = myAtem.Atem.state.inputs;
 
-// Initial setup inputs
-// })
+// work in progress
+myAtem.on('info', console.log);
+myAtem.on('error', console.error);
+myAtem.connect('192.168.20.112');
+myAtem.on('connected', () => {
+    const inputs = myAtem.Atem.state.inputs;
+})
 
 // Redirect to index.html
 app.get('/', (req, res)=>{
@@ -82,6 +81,7 @@ app.post('/api/newClientCameraSelection', (req, res)=>{
     }
 });
 
+// Work in progress
 app.get('/api/atemInputs', (req, res)=>{
     // const inputs = myAtem.Atem.state.inputs;
     const inputs = 
@@ -140,13 +140,14 @@ function randomInput(max){
     return Math.floor(Math.random() * max)+1;
 }
 
-setInterval(() => {
-    let program = randomInput(4);
-    let preview = randomInput(4);
-    wss.clients.forEach((client)=>{
-        client.send(JSON.stringify({pgm:program,pvw:preview,trans:false}));
-    });
-}, 1000);
+// For testing purposes, do not uncomment unless for testing
+// setInterval(() => {
+//     let program = randomInput(4);
+//     let preview = randomInput(4);
+//     wss.clients.forEach((client)=>{
+//         client.send(JSON.stringify({pgm:program,pvw:preview,trans:false}));
+//     });
+// }, 1000);
 
 
 server.listen(HTTP_PORT, ()=>console.log("Server listening on http://localhost:"+HTTP_PORT));
