@@ -1,4 +1,5 @@
 // Requires
+var argv = require('minimist')(process.argv.slice(2));
 const express = require('express');
 const http = require('http');
 const fs = require('fs');
@@ -14,7 +15,11 @@ let program = 0;
 let preview = 0;
 
 // PORTS
-const HTTP_PORT = 8080;
+if(argv.port == undefined) {
+    console.log("No port defined, running on default 8080");
+    console.log("To define a port, start node with the following argument: --port [PORT]");
+}
+const HTTP_PORT = argv.port ? argv.port : 8080;
 
 
 app.use( express.json() );
@@ -145,3 +150,8 @@ setInterval(() => {
 
 
 server.listen(HTTP_PORT, ()=>console.log("Server listening on http://localhost:"+HTTP_PORT));
+
+process.on('SIGINT', function() {
+    console.log("\nGracefully shutting down from SIGINT (Ctrl+C)");
+    process.exit();
+});
