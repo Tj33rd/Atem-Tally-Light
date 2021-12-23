@@ -10,8 +10,9 @@
     <input id="myCam" placeholder="Camera Input"/>
     <button onclick="setMyCam()">Apply</button>
 
-    <p id="tally">Please select a (valid) camera</p>
-    <a href="config.html">TO EDIT</a>
+    <p id="tally">Enter camera input</p>
+    <p id="tallyName"></p>
+    <a href="config.html">Config</a>
 </body>
 
 <style>
@@ -40,6 +41,10 @@
     const socket = new WebSocket(`ws://${location.host}`);
 
     let myCam = 0;
+    let myCamName = "";
+
+    let inputs = [];
+    fetchInputs();
     
 
     let currentProgram = 0;
@@ -60,15 +65,54 @@
         }
     });
 
+    function fetch_status(response, format) {
+		
+		return new Promise((resolve, reject) => {
+			
+			if( response.status >= 200 && response.status < 300 ) {
+				if( format == 'json' ) {
+					resolve(response.json());
+				} else {
+					resolve(response.text());
+				}
+			} else {
+				reject(response);
+			}
+			
+		});
+	}
+    
+    function fetchInputs(){
+        fetch(`/api/atemInputs`, {
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+			},
+			credentials: 'same-origin',
+			mode: 'cors',
+			
+		}).then(response => {
+			return fetch_status(response, 'json');
+			
+		}).then(data => {
+			inputs = data.inputs;
+			
+		}).catch(err => {
+			console.log(err.status);
+		});
+        return true;
+    };
+
     function setMyCam(){
         myCam = parseInt(document.getElementById("myCam").value);
         setTally();
     }
 
     function setTally() {
-        if(myCam == currentProgram){
-            document.body.style.backgroundColor = "red";
-            document.body.style.color = "black"
+        if(fetchInputs()){
+            if(myCam == currentProgram){
+        document.body.style.backgroundColor = "red";
+        document.body.style.color = "black"
         }else if(myCam == currentPreview){
             document.body.style.backgroundColor = inTrans ? "red" : "green";
             document.body.style.color = "black"
@@ -77,11 +121,16 @@
             document.body.style.color = "white"
         }
         if(myCam <= 0 || myCam == null || isNaN(myCam)){
-            document.getElementById("tally").innerHTML = "Please select a (valid) camera";
+            document.getElementById("tally").innerHTML = "Enter camera input";
         } else {
             document.getElementById("tally").innerHTML = myCam;
+            document.getElementById("tallyName").innerHTML = inputs.find(item => item.id == myCam) ? inputs.find(item => item.id == myCam).name : "";
         }
+        }
+        
     }
+
+    
 </script>
 
 </html>
