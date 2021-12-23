@@ -19,17 +19,15 @@ const HTTP_PORT = 8080;
 
 app.use( express.json() );
 
-myAtem.on('info', console.log);
-myAtem.on('error', console.error);
-myAtem.connect('192.168.20.112');
-myAtem.on('connected', () => {
-	myAtem.changeProgramInput(1).then(() => {
-		// Fired once the atem has acknowledged the command
-		// Note: the state likely hasnt updated yet, but will follow shortly
-		console.log('Program input set');
-	})
-	// console.log(myAtem.state);
-})
+// myAtem.on('info', console.log);
+// myAtem.on('error', console.error);
+// myAtem.connect('192.168.20.112');
+// myAtem.on('connected', () => {
+// 	// console.log(myAtem.state);
+// const inputs = myAtem.Atem.state.inputs;
+
+// Initial setup inputs
+// })
 
 // Redirect to index.html
 app.get('/', (req, res)=>{
@@ -79,6 +77,37 @@ app.post('/api/newClientCameraSelection', (req, res)=>{
     }
 });
 
+app.get('/api/atemInputs', (req, res)=>{
+    // const inputs = myAtem.Atem.state.inputs;
+    const inputs = 
+    [
+        {
+            id: 1,
+            name: "RAIL"
+        },
+        {
+            id: 2,
+            name: "PTZ1"
+        },
+        {
+            id: 3,
+            name: "PTZ2"
+        },
+        {
+            id: 4,
+            name: "PTZ3"
+        },
+        {
+            id: 5,
+            name: "LESSENAAR"
+        }
+    ]
+    res.send({
+        inputs: inputs
+    });
+    res.end();
+});
+
 function writePage(req, res, page){
     res.writeHead(200, {'Content-Type': 'text/html'});
     fs.readFile(page, (error, data)=>{
@@ -93,6 +122,7 @@ function writePage(req, res, page){
 }
 
 myAtem.on('stateChanged', (state,pathToChange)=>{
+    //Maybe use "myAtem.listVisibleInputs"
     program = state.video.mixEffects[0].programInput;
     preview = state.video.mixEffects[0].previewInput;
     wss.clients.forEach((client)=>{
@@ -100,15 +130,18 @@ myAtem.on('stateChanged', (state,pathToChange)=>{
     });
 });
 
+
 function randomInput(max){
     return Math.floor(Math.random() * max)+1;
 }
 
-// setInterval(() => {
-//     let program = randomInput(4);
-//     let preview = randomInput(4);
-    
-// }, 1000);
+setInterval(() => {
+    let program = randomInput(4);
+    let preview = randomInput(4);
+    wss.clients.forEach((client)=>{
+        client.send(JSON.stringify({pgm:program,pvw:preview,trans:false}));
+    });
+}, 1000);
 
 
 server.listen(HTTP_PORT, ()=>console.log("Server listening on http://localhost:"+HTTP_PORT));

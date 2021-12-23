@@ -7,11 +7,11 @@
     <title>Tally Test</title>
 </head>
 <body>
-    <p id="tally">Edit page</p>
-    <a href="tally.html">BACK</a>
+    <p id="tally">Config</p>
     <div id="clients" class="container" style="max-width: 300px; margin: auto;">
-        
     </div>
+    <a href="tally.html">Back</a>
+
 </body>
 
 <style>
@@ -41,6 +41,8 @@
 
     let previousConnections = [];
     let connections = [];
+    let inputs = [];
+    
 
     
 
@@ -53,20 +55,28 @@
         });
 
         newDiff.forEach(client => {
-
             if(document.getElementById(client) == null){
                 document.getElementById('clients').innerHTML += `
                 <div class="client" id="${client}" style="align-items: center; display: flex; text-align: center;">
                     <p>${client}</p>
-                    <select name="cameras" id="cameras" onchange="selectCamera(this);">
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
+                    <select class="camerasSelect" name="cameras" id="${client}-select" onchange="selectCamera(this);">
+                        <option disabled selected value> -- Select a camera -- </option>
                     </select>
                 </div>`;
             }
+
+            inputs.forEach(input => {
+            var selectEls = document.getElementsByClassName('camerasSelect');
+            var i;
+            for (i = 0; i < selectEls.length; i++) {
+                if(document.getElementById("option-"+client+"-"+input.id) == null){
+                    document.getElementById(client+"-select").innerHTML += `<option value="${input.id}" id="option-${client}-${input.id}">${input.id} - ${input.name}</option>`;
+                }
+            }
         });
+        });
+
+        
 
         previousConnections = connections;
     }
@@ -109,9 +119,29 @@
 			setNewConnections( data.connections )
 			
 		}).catch(err => {
+			console.log(err);
+		});
+	};
+
+    function fetchInputs(){
+        fetch(`/api/atemInputs`, {
+			method: 'GET',
+			headers: {
+				'Accept': 'application/json',
+			},
+			credentials: 'same-origin',
+			mode: 'cors',
+			
+		}).then(response => {
+			return fetch_status(response, 'json');
+			
+		}).then(data => {
+			inputs = data.inputs;
+			
+		}).catch(err => {
 			console.log(err.status);
 		});
-	}
+    };
 
     function newClientCameraSelection(cameraID, clientID) {
         const data = {cameraID, clientID};
@@ -122,22 +152,29 @@
                 'Content-Type': 'application/json'
             }
         };
-        console.log("fetching");
 		fetch(`/api/newClientCameraSelection`, options);
 	}
 
-    socket.addEventListener('open', (event)=>{
-        fetchClients();
-    });
+    
 
 
     function selectCamera(value){
         newClientCameraSelection(value.value,value.parentElement.id)
     }
+    window.addEventListener('load', function () {
+        fetchInputs();
+    });
+    socket.addEventListener('open', (event)=>{
+        fetchInputs();
+        fetchClients();
+    });
 
     setInterval(() => {
         fetchClients();
     }, 1000);
+
+    
+    
 
 </script>
 
