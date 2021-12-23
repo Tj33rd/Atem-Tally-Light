@@ -30,7 +30,7 @@ myAtem.on('info', console.log);
 myAtem.on('error', console.error);
 myAtem.connect('192.168.20.112');
 myAtem.on('connected', () => {
-    const inputs = myAtem.Atem.state.inputs;
+    console.log("Connected");
 })
 
 // Redirect to index.html
@@ -71,6 +71,7 @@ app.post('/api/newClientCameraSelection', (req, res)=>{
     }
 
     if(clientID && cameraID){
+        console.log(cameraID);
         wss.clients.forEach(ws=>{
             if(ws._socket.remoteAddress === clientID){
                 ws.send(JSON.stringify({newSelectedCamera: cameraID}));
@@ -83,30 +84,7 @@ app.post('/api/newClientCameraSelection', (req, res)=>{
 
 // Work in progress
 app.get('/api/atemInputs', (req, res)=>{
-    // const inputs = myAtem.Atem.state.inputs;
-    const inputs = 
-    [
-        {
-            id: 1,
-            name: "RAIL"
-        },
-        {
-            id: 2,
-            name: "PTZ1"
-        },
-        {
-            id: 3,
-            name: "PTZ2"
-        },
-        {
-            id: 4,
-            name: "PTZ3"
-        },
-        {
-            id: 5,
-            name: "LESSENAAR"
-        }
-    ]
+    const inputs = myAtem._state.inputs
     res.send({
         inputs: inputs
     });
@@ -128,8 +106,10 @@ function writePage(req, res, page){
 
 myAtem.on('stateChanged', (state,pathToChange)=>{
     //Maybe use "myAtem.listVisibleInputs"
-    program = state.video.mixEffects[0].programInput;
-    preview = state.video.mixEffects[0].previewInput;
+    // console.log(pathToChange);
+    // console.log(state.video.mixEffects[0]);
+    program = myAtem._state.inputs[state.video.mixEffects[0].programInput].shortName;
+    preview = myAtem._state.inputs[state.video.mixEffects[0].previewInput].shortName;
     wss.clients.forEach((client)=>{
         client.send(JSON.stringify({pgm:program,pvw:preview,trans:state.video.mixEffects[0].transitionPosition.inTransition}));
     });

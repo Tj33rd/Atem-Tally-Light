@@ -40,15 +40,15 @@
 <script>
     const socket = new WebSocket(`ws://${location.host}`);
 
-    let myCam = 0;
+    let myCam;
     let myCamName = "";
 
     let inputs = [];
     fetchInputs();
     
 
-    let currentProgram = 0;
-    let currentPreview = 0;
+    let currentProgram;
+    let currentPreview;
     let trans = false;
 
     socket.addEventListener('message', (event)=>{
@@ -59,6 +59,7 @@
             setTally();
         }else if(JSON.parse(event.data).newSelectedCamera != null){
             myCam = JSON.parse(event.data).newSelectedCamera;
+            console.log(myCam);
             setTally();
         }else{
             console.log(event);
@@ -104,7 +105,7 @@
     };
 
     function setMyCam(){
-        myCam = parseInt(document.getElementById("myCam").value);
+        myCam = document.getElementById("myCam").value;
         setTally();
     }
 
@@ -120,14 +121,24 @@
             document.body.style.backgroundColor = "black";    
             document.body.style.color = "white"
         }
-        if(myCam <= 0 || myCam == null || isNaN(myCam)){
+        if(myCam == null){
             document.getElementById("tally").innerHTML = "Enter camera input";
         } else {
-            document.getElementById("tally").innerHTML = myCam;
-            document.getElementById("tallyName").innerHTML = inputs.find(item => item.id == myCam) ? inputs.find(item => item.id == myCam).name : "";
+            document.getElementById("tally").innerHTML = findInput(myCam) != null ? findInput(myCam).shortName : myCam;
+            document.getElementById("tallyName").innerHTML = findInput(myCam)  != null ? findInput(myCam).longName : "";
         }
         }
         
+    }
+
+    function findInput(camShortName){
+        for(var input in inputs){
+            if(inputs[input].shortName == camShortName){
+                return inputs[input]
+            }
+        }
+
+        return null;
     }
 
     

@@ -64,16 +64,13 @@
                     </select>
                 </div>`;
             }
-
-            inputs.forEach(input => {
             var selectEls = document.getElementsByClassName('camerasSelect');
             var i;
-            for (i = 0; i < selectEls.length; i++) {
-                if(document.getElementById("option-"+client+"-"+input.id) == null){
-                    document.getElementById(client+"-select").innerHTML += `<option value="${input.id}" id="option-${client}-${input.id}">${input.id} - ${input.name}</option>`;
+            for(const input in inputs){
+                if(document.getElementById("option-"+client+"-"+inputs[input].inputId) == null){
+                    document.getElementById(client+"-select").innerHTML += `<option value="${inputs[input].shortName}" id="option-${client}-${inputs[input].inputId}">${inputs[input].shortName} - ${inputs[input].longName}</option>`;
                 }
             }
-        });
         });
 
         
@@ -116,7 +113,7 @@
 			return fetch_status(response, 'json');
 			
 		}).then(data => {
-			setNewConnections( data.connections )
+			setNewConnections( data.connections );
 			
 		}).catch(err => {
 			console.log(err);
@@ -137,6 +134,7 @@
 			
 		}).then(data => {
 			inputs = data.inputs;
+            
 			
 		}).catch(err => {
 			console.log(err.status);
